@@ -1,0 +1,39 @@
+---
+title: "Day 3 EOD"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+```{r}
+toolik_biochem <- read_csv(here::here("data", "2011_Kling_Akchem.csv")) %>%
+  janitor::clean_names()
+toolik_biochem[toolik_biochem == "."] <- NA
+```
+
+```{r}
+inlet_biochem <- subset(toolik_biochem %>% 
+                          dplyr::filter(site == "Toolik Inlet") %>%
+                          dplyr::select(p_h,doc_u_m,tdn_u_m))
+inlet_biochem <- inlet_biochem %>%
+  mutate(across(everything(), as.numeric))
+```
+
+```{r}
+mean_inlet_biochem <- vector(mode = "numeric", length = ncol(inlet_biochem))
+
+for (i in 1:ncol(inlet_biochem)) {
+  mean_value <- mean(inlet_biochem[[i]], na.rm=TRUE)
+  mean_inlet_biochem[i] <- mean_value
+}
+
+apply(X = inlet_biochem, MARGIN = 2, FUN = mean, na.rm=TRUE)
+map(.x = inlet_biochem, .f = mean, na.rm=TRUE)
+```
+
